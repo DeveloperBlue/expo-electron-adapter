@@ -1,0 +1,81 @@
+{
+  "name": "expo-electron-adapter",
+  "version": "0.1.0",
+  "description": "Build electron applications using expo",
+  "author": "Michael Rooplall <contact@MichaelRooplall.com> (https://www.MichaelRooplall.com)",
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "build2": "tsup --publicDir ./src/ElectronProvider/dist-append",
+    "check:typescript": "tsc --noEmit",
+    "lint": "eslint src",
+    "electron": "cross-env EXPO_PLATFORM='electron' concurrently --names \"metro,tsc,electron\" --prefix-colors \"bgGreen,bgBlue,bgYellow\" \"pnpm run electron:metro\" \"npm run electron:watch\" \"npm run electron:launch\"",
+    "electron:metro": "cross-env BROWSER=none expo start --web --port 16001 --clear",
+    "electron:launch": "cross-env ELECTRON_START_URL=http://localhost:16001 electron electron/dist/main.js",
+    "electron:watch": "tsc -p electron/tsconfig.electron.json --watch"
+  },
+  "keywords": [
+    "expo",
+    "react-native",
+    "electron",
+    "typescript",
+    "uniwind",
+    "tailwind",
+    "react",
+    "metro-bundler",
+    "electron-forge"
+  ],
+  "license": "MIT",
+  "sideEffects": [
+    "*.css"
+  ],
+  "style" : "./dist/uniwind/expo-electron-adapter.css",
+  "exports": {
+    "." : {
+      "default" : "./dist/uniwind/expo-electron-adapter.css"
+    },
+    "./ElectronProvider": {
+      "react-native" : "./dist/ElectronProvider/index.mjs",
+      "import": "./dist/ElectronProvider/index.mjs",
+      "require": "./dist/ElectronProvider/index.cjs",
+      "types": "./dist/ElectronProvider/index.d.ts"
+    },
+    "./metro": {
+      "import": "./dist/metro/index.mjs",
+      "require": "./dist/metro/index.cjs",
+      "types": "./dist/metro/index.d.ts"
+    },
+    "./expo": {
+      "import": "./dist/expo/index.mjs",
+      "require": "./dist/expo/index.cjs",
+      "types": "./dist/expo/index.d.ts"
+    }
+  },
+  "browser": {
+    "./ElectronProvider": "./dist/ElectronProvider/index.mjs"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "electron": ">=40",
+    "expo": ">=49",
+    "react": ">=19",
+    "react-native": ">=0.72"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "@types/react": "~19.1.10",
+    "concurrently": "^9.2.1",
+    "metro-config": "^0.83.0",
+    "tsdown": "^0.20.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "cross-env": "^10.1.0"
+  }
+}
