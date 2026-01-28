@@ -1,0 +1,9 @@
+{
+  "name": "oneapp-client",
+  "version": "1.0.0",
+  "main": "./main.js",
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "40.0.0"
+  }
+}

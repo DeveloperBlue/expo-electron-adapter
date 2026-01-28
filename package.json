@@ -1,17 +1,20 @@
 {
   "name": "expo-electron-adapter",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Build electron applications using expo",
   "author": "Michael Rooplall <contact@MichaelRooplall.com> (https://www.MichaelRooplall.com)",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url" : "https://github.com/DeveloperBlue/expo-electron-adapter.git"
+  },
   "scripts": {
     "build": "tsup",
-    "build2": "tsup --publicDir ./src/ElectronProvider/dist-append",
     "check:typescript": "tsc --noEmit",
     "lint": "eslint src",
     "electron": "cross-env EXPO_PLATFORM='electron' concurrently --names \"metro,tsc,electron\" --prefix-colors \"bgGreen,bgBlue,bgYellow\" \"pnpm run electron:metro\" \"npm run electron:watch\" \"npm run electron:launch\"",
     "electron:metro": "cross-env BROWSER=none expo start --web --port 16001 --clear",
-    "electron:launch": "cross-env ELECTRON_START_URL=http://localhost:16001 electron electron/dist/main.js",
+    "electron:launch": "cross-env METRO_ELECTRON_SERVER=http://localhost:16001 electron electron/dist/main.js",
     "electron:watch": "tsc -p electron/tsconfig.electron.json --watch"
   },
   "keywords": [

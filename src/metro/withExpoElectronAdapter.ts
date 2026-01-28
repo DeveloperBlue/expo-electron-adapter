@@ -1,33 +1,44 @@
 import { MetroConfig } from 'metro-config';
 import { isExpoElectronRuntime } from '../expo/isExpoElectron';
 
-export const withExpoElectronAdapter = (config : MetroConfig) : MetroConfig => {
-
-  if (!isExpoElectronRuntime) { return config }
-
-  const originalResolveRequest = config.resolver!.resolveRequest
+export const withExpoElectronAdapter = (config: MetroConfig): MetroConfig => {
+  const originalResolveRequest = config.resolver?.resolveRequest;
+  
+  // Only add "browser" platform if NOT in Electron runtime
+  const customPlatforms = isExpoElectronRuntime 
+    ? ["electron"]
+    : ["browser"];
   
   return {
     ...config,
-    resolver : {
+    resolver: {
       ...config.resolver,
-      platforms : [
-        "electron", "browser", ...(config.resolver!.platforms || [])
+      platforms: [
+        ...customPlatforms,
+        ...(config.resolver?.platforms || [])
       ],
       resolveRequest: (context, moduleName, platform) => {
-      
-        // Only apply *.electron resolutions for component files in our app, and not for node_modules
+        // Only apply custom resolutions for component files in our app, and not for node_modules
         const isAppCode = context.originModulePath && 
                           !context.originModulePath.includes('node_modules');
-        const targetPlatform = isAppCode ? (isExpoElectronRuntime ? "electron" : platform) : platform;
+        
+        let targetPlatform = platform;
+        
+        if (isAppCode) {
+          if (isExpoElectronRuntime) {
+            // In Electron runtime, use "electron" platform
+            targetPlatform = "electron";
+          } else if (platform === "web") {
+            // In browser runtime (web but not Electron), use "browser" platform
+            targetPlatform = "browser";
+          }
+        }
         
         if (originalResolveRequest) {
           return originalResolveRequest(context, moduleName, targetPlatform);
         }
         return context.resolveRequest(context, moduleName, targetPlatform);
-
       }
     }
   }
-
 }

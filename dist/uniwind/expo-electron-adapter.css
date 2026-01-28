@@ -1,1 +1,2 @@
 @custom-variant electron (html[data-platform-electron="true"] &);
+@custom-variant browser (html:not([data-platform-electron="true"]) &);

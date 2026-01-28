@@ -5,21 +5,26 @@ var isExpoElectronRuntime = typeof process !== "undefined" && process.env && pro
 
 // src/metro/withExpoElectronAdapter.ts
 var withExpoElectronAdapter = (config) => {
-  if (!isExpoElectronRuntime) {
-    return config;
-  }
-  const originalResolveRequest = config.resolver.resolveRequest;
+  const originalResolveRequest = config.resolver?.resolveRequest;
+  const customPlatforms = isExpoElectronRuntime ? ["electron"] : ["browser"];
   return {
     ...config,
     resolver: {
       ...config.resolver,
       platforms: [
-        "electron",
-        ...config.resolver.platforms || []
+        ...customPlatforms,
+        ...config.resolver?.platforms || []
       ],
       resolveRequest: (context, moduleName, platform) => {
         const isAppCode = context.originModulePath && !context.originModulePath.includes("node_modules");
-        const targetPlatform = isAppCode ? isExpoElectronRuntime ? "electron" : platform : platform;
+        let targetPlatform = platform;
+        if (isAppCode) {
+          if (isExpoElectronRuntime) {
+            targetPlatform = "electron";
+          } else if (platform === "web") {
+            targetPlatform = "browser";
+          }
+        }
         if (originalResolveRequest) {
           return originalResolveRequest(context, moduleName, targetPlatform);
         }

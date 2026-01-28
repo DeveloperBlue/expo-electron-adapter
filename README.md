@@ -1,70 +1,81 @@
 # expo-electron-adapter
+![npm](https://img.shields.io/npm/v/@developerblue/expo-electron-adapter)
+![license](https://img.shields.io/npm/l/@developerblue/expo-electron-adapter)
+![platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android%20%7C%20iOS-blue)
+![expo](https://img.shields.io/badge/Expo-compatible-000020?logo=expo)
+![electron](https://img.shields.io/badge/Electron-powered-47848F?logo=electron)
+![CI](https://github.com/developerblue/expo-electron-adapter/actions/workflows/ci.yml/badge.svg)
+![downloads](https://img.shields.io/npm/dw/@developerblue/expo-electron-adapter)
 
-Expo Electron Adapter serves as a toolkit to add electron support into your expo application. 
+# v0.0.1-alpha
 
-Features
-- Support for *.electron platform-specific files
-- HMR for electron development
-- Type-safe ElectronProvider for accessing APIs exposed through preload.ts
-- Platform library for checking platform and OS (electron, android, ios, web) (web on windows, macos, linux, android, or ios)
-- Optional support for ``electron:*`` platform selectors in Uniwind
+Build cross-platform applications for Windows, macOS, Linux, Android, and iOS using Expo and Electron.
 
-TODO
-Define minimum expo and electron versions
+> [!CAUTION]
+>  You are currently viewing a (working) proof-of-concept! This is a very new, very experimental project and should be used with caution!
+> 
+> See [Contributing & Roadmap](#contributing-&-roadmap) for missing and planned features.
+
+## Features
+
+- ⚡ Integration between **Expo** and **Electron**
+- 🧩 Single codebase for **desktop (Electron)**, **web**, and **mobile (Expo)**
+- 🧠 Fully typed Electron API access via React Context
+- 🛠️ Automatic Electron boilerplate and project scaffolding
+- 🎨 Built-in **Uniwind** support with `electron:*` and `browser:*` selectors
+- 🏗️ electron-builder support (coming soon) 🚧
+- 🗂️ Platform-specific file resolution (`*.electron.*`, `*.browser.*`)
+
 
 # Setup
 
-The following steps can be applied to a new expo project or an existing one.
+> [!NOTE]  
+> This tool expects that you already have some understanding of [expo](https://docs.expo.dev/) and [electron](https://www.electronjs.org/docs/latest).
 
 ## Installation
 
-> Ensure electron is already installed. If you have not done so already, see their instructions [here](https://www.electronjs.org/docs/latest/tutorial/installation).
+> Ensure **Electron** is already installed. If you have not done so already, see their instructions [here](https://www.npmjs.com/package/electron).
  
 ### Step 1: Install expo-electron-adapter
  ```bash
-npm install @developerblue/expo-electron-adapter -D
+npm install https://github.com/developerblue/expo-electron-adapter -D
  ```
 
 ### Step 2: Configure Bundler
 
 > If you don’t see a ``metro.config.js`` file in your project, you can create it with ``npx expo customize metro.config.js``.
 
+Wrap your metro config with ``useExpoElectronAdapter``. If you have any other metro config modifiers, feel free to add them after the adapter.
+
 ```js
 // metro.config.js
 const { getDefaultConfig } = require('expo/metro-config');
-const { withExpoElectronAdapter } = require('expo-electron-adapter/metro')
+const { withExpoElectronAdapter } = require('/expo-electron-adapter/metro')
 
 const config = getDefaultConfig(__dirname);
 
-// your metro modifications
+/* your metro modifications */
 
-module.exports = withExpoElectronAdapter(config));
+module.exports = withExpoElectronAdapter(config);
 ```
 ### Step 3: Add Electron Boilerplate
 
-> If you already have your electron boilerplate setup, you can skip this step.
-> 
-> **expo-elector-adapter** expects to find certain files in specific places by default, but you can override this behavior at any time.
+> If you already have your own existing electron boilerplate setup, you can skip this step.
 
-You can generate a boilerplate with the following command at the root of your project:
+You can generate an electron boilerplate with the following command **at the root of your project:**
 ```bash
 npx expo-electron-adapter generate
 ```
-This will generate an ``electron`` folder at the root of your project, containing a ``main.ts``, ``preload.ts``, ``api/api-interface.ts``, and other necesary files.
+This will generate an ``electron`` folder at the root of your project, containing ``main.ts``, ``preload.ts``, ``api/api-interface.ts``, and other required files.
 
 
-### Step 4 Add the ElectronProvider to your App
+### Step 4: Add the ElectronProvider to your App
 
-> This Provider handles injecting the preload script into your application. It also allows you to wrap your electron APIs in a type-safe useElectron() hook.
+> This provider handles injecting the ``preload`` script into your application. It also allows you to wrap any of your exposed electron APIs in a type-safe useElectron() hook.
 >
-> If you prefer to skip this step, you can import the electron preload script manually yourself and call all your apis through the 'window' global as normal.
+> If you prefer to skip this step, you can import the electron preload script manually yourself and call all your APIs through the 'window' global as normal.
 
 Modify your ``app/_layout.tsx`` file to wrap your app with the ``ElectronApiProvider``. 
-
-For every api endpoint you make available in your ``preload`` script using ``exposeInMainWorld()``, you should add that key to the array of keys passed to the ``apis`` prop. If you are using the generated boilerplate, just ``["api"]`` is fine as a default.
-
-
-If you have a custom preload script in your ``main.ts``, you can pass it in using the ``preloadSrc`` attribute. By default, it uses ``./preload.js``.
 
 ```tsx
 // _layout.tsx
@@ -83,17 +94,20 @@ export default function RootLayout() {
 }
 
 ```
+For every [api endpoint](https://www.electronjs.org/docs/latest/api/context-bridge) you make available in your ``preload`` script using ``exposeInMainWorld()``, you should add that key to the array of keys passed to the ``apis`` prop. If you are using the generated boilerplate, just ``["api"]`` is fine as a default.
 
-## Step 4: Uniwind Support (Optional)
+If you have a custom preload script in your ``main.ts``, you can pass it in using the ``preloadSrc`` attribute. By default, it uses ``./preload.js``.
 
-If you are using [Uniwind]() to add tailwind CSS to your project, you can easily add support for the ``electron:*`` and ``browser:*`` platform selectors. This allows you to style your components differently when running in Electron or in a browser.
+## Step 5: Uniwind Support (Optional)
 
-### Usage Example
+If you are using [Uniwind]() to add tailwind CSS to your react-native project, you can add support for the ``electron:*`` and ``browser:*`` platform selectors. This allows you to style your components differently whether they are rendering in Electron or in a browser.
+
+**Example**
 ```tsx
 <View className="min-w-8 min-h-8 electron:bg-yellow-600 browser:bg-blue-600 android:bg-green-600 bg-white"/>
 ```
 
-### Step 1: Add expo-electron-adapter to global.css
+### Step 5.1: Add expo-electron-adapter to global.css
 
 Import ``expo-electron-adapter`` in your global.css file, right after ``uniwind``.
 ```css
@@ -104,9 +118,9 @@ Import ``expo-electron-adapter`` in your global.css file, right after ``uniwind`
 ...
 ```
 
-### Step 2: Modify +html.tsx
+### Step 5.2: Modify +html.tsx
 
-Add the following import to your ``+html.tsx`` file, then add the ``data-platform-electron`` attribute check to the html tag as follows:
+Add the following import for ``isExpoElectronRuntime`` to your ``+html.tsx`` file; then add the ``data-platform-electron`` attribute check to the ``html`` tag as follows:
 
 ```tsx
 import { isExpoElectronRuntime } from 'expo-electron-adapter/metro';
@@ -125,21 +139,43 @@ export default function Root({ children }: PropsWithChildren) {
 }
 ```
 
----
+> Also remember to ensure your ``metro.config.js`` is correctly configured to include the expo-electron-adapter and Uniwind plugin.
 
+## Step 6: Run
 
-Create electron boilerplate (``expoex init``)
-Edit ``+html.tsx`` to add electron support (can be injected via metro?)
-Edit metro.config.js
-Create typed useElectron hook
-Add uniwind support
+Add the following command to your ``package.json`` script:
+```json
+"electron" : "npx expo-electron-adapter start"
+```
 
-Run ``expoex doctor`` healthcheck
+Then run it to start an electron-specific expo web server
+```bash
+npm run electron
+```
 
+# Bundling for electron-builder
 
-## Access the Elecron API with a Custom Type-Safe Hook
+> [!CAUTION]
+> This section is a work-in-progress
 
-To access your axposed pis with type-safety, create a custom 'useElectron' hook. You can then pass this hook the shape your API and use it in your components.
+To package your application for distribution with electron-builder, you must transpile the main and preload scripts from typescript to javascript.
+
+This tool uses ``tsup``  for bundling the main and preload scripts, and uses expo's ``export`` command to export the react-native part of the application.
+
+```bash
+expo-electron-adapter bundle # generates electron and expo js bundles
+```
+
+The generated bundle for packaging with electron-builder can be found at ``.electron/build/bundle``
+
+> [!NOTE]
+> The expo ``export`` command's static files can be found in ``.electron/build/static``. In teh fututure. This is referenced by the electron application in ``.electron/build/bundle`` as the starting point for the renderer.
+> 
+> In the future, these will be reduced down to one single bundle and more control will be given to the user to control the build process.
+
+## Access the Electron API with a Custom Type-Safe Hook
+
+To access your exposed pis with type-safety, create a custom 'useElectron' hook. You can then pass this hook the shape your API and use it in your components.
 
 ```tsx
 // user-created @/hooks/useElectron.tsx
@@ -165,22 +201,19 @@ export default function Component() {
 
 ```
 
-## Platform
-expo-electron-adapter does its best to extend on the react-native Platform library. You can also check if the Platform is specifically running in Electron by using the ``isElectron`` hook.
-
-The "platform" and "os" are distinguished as follows:
-
-``Platform.platform`` returns ``<android, ios, web, electron>``
-
-``Platform.OS`` returns ``<windows, macos, linux, android, ios>``
-
-So you can have a platform of ``"web"`` on an OS of ``"iOS"``. This means the application is running on the browser on iOS, not as a native application.
-
-You have access to the ``Platform.select()`` method to select platform-specific styles or components. If you are using [Uniwind](), it is [recommended that you use className platform selectors]() over using the Platform library.
-
+# Contributing & Roadmap
+- [ ] [electron-builder](https://www.electron.build/index.html) steps
+- [ ] Build a Platform library similar to react-native's [Platform](https://reactnative.dev/docs/platform) library. [\[Read More\]](./docs/Platform.md)
+- [ ] Convert uniwind installation to a codemod. e.g. ``npx expo-electron-adapter add-uniwind``.
+- [ ] CI/CD Testing suite with jest
+- [ ] Monorepo with example projects
+- [ ] Issue templates
+- [ ] Proper documentation docs
 
 # Alternative Libraries
 
 Electron is just one way you can run your react-native expo applications on the desktop. You may also want to check out:
-- react-native-windows (Windows and MacOS)
-- tauri (rust-based light-weight Electron alternative)
+- [react-native-windows](https://github.com/microsoft/react-native-windows) (Windows and macOS)
+- [proton-native](https://proton-native.js.org/#/) (Cross-platform desktop app framework that exports to Qt)
+
+- [tauri](https://v2.tauri.app/) (rust-based light-weight Electron alternative)
