@@ -1,5 +1,6 @@
 import { MetroConfig } from 'metro-config';
 import { isExpoElectronRuntime } from '../expo/isExpoElectron';
+import path from 'path';
 
 export const withExpoElectronAdapter = (config: MetroConfig): MetroConfig => {
   const originalResolveRequest = config.resolver?.resolveRequest;
@@ -22,22 +23,31 @@ export const withExpoElectronAdapter = (config: MetroConfig): MetroConfig => {
         const isAppCode = context.originModulePath && 
                           !context.originModulePath.includes('node_modules');
         
-        let targetPlatform = platform;
-        
-        if (isAppCode) {
-          if (isExpoElectronRuntime) {
-            // In Electron runtime, use "electron" platform
-            targetPlatform = "electron";
-          } else if (platform === "web") {
-            // In browser runtime (web but not Electron), use "browser" platform
-            targetPlatform = "browser";
+        if (isAppCode && platform === "web") {
+          // Define the fallback chain based on runtime
+          const platformChain = isExpoElectronRuntime 
+            ? ["electron", "web"]  // electron → web → base
+            : ["browser", "web"];   // browser → web → base
+          
+          // Try each platform in the chain
+          for (const targetPlatform of platformChain) {
+            try {
+              if (originalResolveRequest) {
+                return originalResolveRequest(context, moduleName, targetPlatform);
+              }
+              return context.resolveRequest(context, moduleName, targetPlatform);
+            } catch (error) {
+              // If this platform doesn't exist, continue to next in chain
+              continue;
+            }
           }
         }
         
+        // Default resolution (base .tsx file or other platforms)
         if (originalResolveRequest) {
-          return originalResolveRequest(context, moduleName, targetPlatform);
+          return originalResolveRequest(context, moduleName, platform);
         }
-        return context.resolveRequest(context, moduleName, targetPlatform);
+        return context.resolveRequest(context, moduleName, platform);
       }
     }
   }

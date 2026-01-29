@@ -15,18 +15,23 @@ var withExpoElectronAdapter = (config) => {
       ],
       resolveRequest: (context, moduleName, platform) => {
         const isAppCode = context.originModulePath && !context.originModulePath.includes("node_modules");
-        let targetPlatform = platform;
-        if (isAppCode) {
-          if (isExpoElectronRuntime) {
-            targetPlatform = "electron";
-          } else if (platform === "web") {
-            targetPlatform = "browser";
+        if (isAppCode && platform === "web") {
+          const platformChain = isExpoElectronRuntime ? ["electron", "web"] : ["browser", "web"];
+          for (const targetPlatform of platformChain) {
+            try {
+              if (originalResolveRequest) {
+                return originalResolveRequest(context, moduleName, targetPlatform);
+              }
+              return context.resolveRequest(context, moduleName, targetPlatform);
+            } catch (error) {
+              continue;
+            }
           }
         }
         if (originalResolveRequest) {
-          return originalResolveRequest(context, moduleName, targetPlatform);
+          return originalResolveRequest(context, moduleName, platform);
         }
-        return context.resolveRequest(context, moduleName, targetPlatform);
+        return context.resolveRequest(context, moduleName, platform);
       }
     }
   };
