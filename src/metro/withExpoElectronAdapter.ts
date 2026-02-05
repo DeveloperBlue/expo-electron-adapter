@@ -24,6 +24,7 @@ export const withExpoElectronAdapter = (config: MetroConfig): MetroConfig => {
                           !context.originModulePath.includes('node_modules');
         
         if (isAppCode && platform === "web") {
+
           // Define the fallback chain based on runtime
           const platformChain = isExpoElectronRuntime 
             ? ["electron", "web"]  // electron → web → base
@@ -32,10 +33,16 @@ export const withExpoElectronAdapter = (config: MetroConfig): MetroConfig => {
           // Try each platform in the chain
           for (const targetPlatform of platformChain) {
             try {
-              if (originalResolveRequest) {
-                return originalResolveRequest(context, moduleName, targetPlatform);
+
+              const result = originalResolveRequest
+                ? originalResolveRequest(context, moduleName, targetPlatform)
+                : context.resolveRequest(context, moduleName, targetPlatform);
+
+              if (result.type === 'sourceFile' && result.filePath.includes(`.${targetPlatform}.`)) {
+                return result;
               }
-              return context.resolveRequest(context, moduleName, targetPlatform);
+
+              continue;
             } catch (error) {
               // If this platform doesn't exist, continue to next in chain
               continue;
@@ -43,11 +50,10 @@ export const withExpoElectronAdapter = (config: MetroConfig): MetroConfig => {
           }
         }
         
-        // Default resolution (base .tsx file or other platforms)
-        if (originalResolveRequest) {
-          return originalResolveRequest(context, moduleName, platform);
-        }
-        return context.resolveRequest(context, moduleName, platform);
+        // Default resolution (For non-app code or other platforms)
+        return originalResolveRequest
+                ? originalResolveRequest(context, moduleName, platform)
+                : context.resolveRequest(context, moduleName, platform);
       }
     }
   }
