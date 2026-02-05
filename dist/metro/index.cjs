@@ -21,19 +21,17 @@ var withExpoElectronAdapter = (config) => {
           const platformChain = isExpoElectronRuntime ? ["electron", "web"] : ["browser", "web"];
           for (const targetPlatform of platformChain) {
             try {
-              if (originalResolveRequest) {
-                return originalResolveRequest(context, moduleName, targetPlatform);
+              const result = originalResolveRequest ? originalResolveRequest(context, moduleName, targetPlatform) : context.resolveRequest(context, moduleName, targetPlatform);
+              if (result.type === "sourceFile" && result.filePath.includes(`.${targetPlatform}.`)) {
+                return result;
               }
-              return context.resolveRequest(context, moduleName, targetPlatform);
+              continue;
             } catch (error) {
               continue;
             }
           }
         }
-        if (originalResolveRequest) {
-          return originalResolveRequest(context, moduleName, platform);
-        }
-        return context.resolveRequest(context, moduleName, platform);
+        return originalResolveRequest ? originalResolveRequest(context, moduleName, platform) : context.resolveRequest(context, moduleName, platform);
       }
     }
   };
